@@ -698,6 +698,8 @@ func (sl *sweepLocked) sweep(preserve bool) bool {
 	atomic.Store(&s.sweepgen, sweepgen)
 
 	if s.isUserArenaChunk {
+		atomic.Xadd64(&numEarlyReturnForUserArena, 1)
+
 		if preserve {
 			// This is a case that should never be handled by a sweeper that
 			// preserves the span for reuse.
@@ -994,4 +996,10 @@ func gcPaceSweeper(trigger uint64) {
 			mheap_.pagesSweptBasis.Store(pagesSwept)
 		}
 	}
+}
+
+var numEarlyReturnForUserArena uint64
+
+func NumEarlyReturnForUserArena() uint64 {
+	return numEarlyReturnForUserArena
 }
